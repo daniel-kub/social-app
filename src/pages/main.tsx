@@ -1,33 +1,35 @@
 import { getDocs } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { collection } from "firebase/firestore";
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import {Post} from "../components/post";
+export interface IPost {
+    id: string;
+    title: string;
+    description: string;
+    username: string;
+    userId: string;
+  }
 export const Main = () => {
   const postsRef = collection(db, "posts");
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<IPost [] | null>(null);
 
-  const fetchPosts = async () => {
+  const getPosts = async () =>{
     const data = await getDocs(postsRef);
-    console.log(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    setPosts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as IPost[]);
   }
+  
 
-
-
-
-  fetchPosts();
-
-    
+  useEffect(() => {
+    getPosts();
+  }, []);    
 
   return (
     
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center px-4">
-      <h1 className="text-4xl font-bold text-gray-800 mb-4">
-        Witamy na stronie głównej 👋
-      </h1>
-      <p className="text-gray-600 text-lg max-w-md">
-        
-      </p>
+      {posts?.map((post) => (
+        <Post post={post} key={post.id}/>
+      ))}
     </div>
   );
 };
